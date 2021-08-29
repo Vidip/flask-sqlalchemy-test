@@ -54,6 +54,17 @@ def create_visit():
             "Error Message": "Dates overlap with existing visit's dates",
         }, 402
 
+def get_single_visit(id):
+    visiting = Visit.query.get(id)
+    if visiting:
+        resp = {"id": visiting.id, "start_date": visiting.start_date, "end_date": visiting.end_date, "instructions": visiting.instructions}
+        return jsonify(resp)
+    else:
+        resp = {
+            "message": "No results found"
+        }
+        return resp, 404
+        
 def no_overlapping_dates(user_id, start_date, end_date):
     """
     method to check for overlapping dates for visit 

@@ -5,3 +5,4 @@ from . import views
 
 app.add_url_rule('/users', view_func=views.user, methods=["GET", "POST"])
 app.add_url_rule('/visit', view_func=views.create_visit, methods=["POST"])
+app.add_url_rule('/visit/<int:id>', view_func=views.get_single_visit, methods=["GET"])
