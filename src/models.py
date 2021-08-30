@@ -38,7 +38,7 @@ class Visit(db.Model, Base):
 
     @validates('end_date')
     def validate_end_date(self, key, end_date):
-         """validator for end date - serializer"""
+        """validator for end date - serializer"""
         formated_date = datetime.datetime.fromisoformat(str(end_date))
         if formated_date >= datetime.datetime.utcnow():
             return formated_date

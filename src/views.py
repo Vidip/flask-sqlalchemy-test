@@ -1,6 +1,7 @@
 from flask import jsonify, request, Response
 from .models import User, db, Visit
 from datetime import datetime
+from sqlalchemy.sql.expression import and_
 import sys
 
 def user():
@@ -66,13 +67,15 @@ def get_single_visit(id):
         }
         return resp, 404
 
-def get_visits(page_id):
+def get_visits(page_id, user_id = None):
+    filters = {}
+    if user_id: filters['user_id'] = user_id
     try:
         visits = Visit.query.with_entities(
             Visit.user_id, 
             Visit.start_date, 
             Visit.end_date
-        ).filter().paginate(page=page_id, per_page=3, error_out=True)
+        ).filter_by(**filters).order_by(Visit.start_date.asc()).paginate(page=page_id, per_page=3, error_out=True)
         return jsonify({
             "total": visits.total, 
             "current_page": visits.page,
