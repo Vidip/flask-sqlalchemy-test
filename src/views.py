@@ -2,7 +2,6 @@ from flask import jsonify, request, Response
 from .models import User, db, Visit
 from datetime import datetime
 from sqlalchemy.sql.expression import and_
-import sys
 
 def user():
     """method to create and fetch users"""
@@ -49,7 +48,7 @@ def create_visit():
             return resp
         return jsonify({
             "id": 1,
-            "username": "aa"
+            "user_id": user_id
         })
     else:
         return {
@@ -57,9 +56,16 @@ def create_visit():
         }, 402
 
 def get_single_visit(id):
-    visiting = Visit.query.get(id)
+    visiting = get_visit_data(id)
+    if type(visiting) != dict:
+        visiting = visiting.__dict__
     if visiting:
-        resp = {"id": visiting.id, "start_date": visiting.start_date, "end_date": visiting.end_date, "instructions": visiting.instructions}
+        resp = {
+            "id": visiting.get('id'), 
+            "start_date": visiting.get('start_date'), 
+            "end_date": visiting.get('end_date'), 
+            "instructions": visiting.get('instructions', '')
+        }
         return jsonify(resp)
     else:
         resp = {
@@ -88,6 +94,12 @@ def get_visits(page_id, user_id = None):
         resp = jsonify({"error": str(e)})
         resp.status_code = 500
         return resp
+
+def get_visit_data(id):
+    try:
+        return Visit.query.get(id)
+    except Exception as e:
+        raise Exception("Issue with Data Fetching")
 
 def no_overlapping_dates(user_id, start_date, end_date):
     """

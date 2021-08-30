@@ -1,6 +1,5 @@
 """Application routes."""
 from flask import current_app as app
-from datetime import datetime
 from . import views
 
 """routes for the project - can be optimized by gaving Lazy View for each View function"""

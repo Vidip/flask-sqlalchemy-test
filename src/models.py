@@ -27,6 +27,9 @@ class Visit(db.Model, Base):
     def __repr__(self):
         return "<Visit {}>".format(self.id)
 
+    def __getitem__(self, field):
+        return self.__dict__[field]
+
     @validates('start_date')
     def validate_start_date(self, key, start_date):
         """validator for start date - serializer"""
