@@ -1,7 +1,7 @@
 from flask import jsonify, request, Response
 from .models import User, db, Visit
-from datetime import datetime
 from sqlalchemy.sql.expression import and_
+from .utils import dates_check
 
 def user():
     """method to create and fetch users"""
@@ -33,7 +33,7 @@ def create_visit():
     user_id = request.json.get("user_id")
     instructions = request.json.get("instructions")
     user_id = int(user_id) if user_id else None
-    if user_id and no_overlapping_dates(user_id, start_date, end_date):
+    if user_id and dates_check.no_overlapping_dates(user_id, start_date, end_date):
         visit = Visit(
             start_date=start_date, 
             end_date=end_date, 
@@ -57,7 +57,7 @@ def create_visit():
 
 def get_single_visit(id):
     visiting = get_visit_data(id)
-    if type(visiting) != dict:
+    if visiting and type(visiting) != dict:
         visiting = visiting.__dict__
     if visiting:
         resp = {
@@ -100,26 +100,6 @@ def get_visit_data(id):
         return Visit.query.get(id)
     except Exception as e:
         raise Exception("Issue with Data Fetching")
-
-def no_overlapping_dates(user_id, start_date, end_date):
-    """
-    method to check for overlapping dates for visit 
-    of the user
-    """
-    user = User.query.get(user_id)
-    if len(user.visits):
-        for i in user.visits:
-            if (
-                datetime.fromisoformat(str(i.start_date)) < 
-                datetime.fromisoformat(str(start_date)) < 
-                datetime.fromisoformat(str(i.end_date))
-            ) or (
-                datetime.fromisoformat(str(i.start_date)) < 
-                datetime.fromisoformat(str(end_date)) < 
-                datetime.fromisoformat(str(i.end_date))
-            ):
-                return False
-    return True
 
 def add_to_database(object):
     """
