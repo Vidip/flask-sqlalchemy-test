@@ -1,6 +1,7 @@
 from flask import jsonify, request, Response
 from .models import User, db, Visit
 from datetime import datetime
+import sys
 
 def user():
     """method to create and fetch users"""
@@ -64,7 +65,27 @@ def get_single_visit(id):
             "message": "No results found"
         }
         return resp, 404
-        
+
+def get_visits(page_id):
+    try:
+        visits = Visit.query.with_entities(
+            Visit.user_id, 
+            Visit.start_date, 
+            Visit.end_date
+        ).filter().paginate(page=page_id, per_page=3, error_out=True)
+        return jsonify({
+            "total": visits.total, 
+            "current_page": visits.page,
+            "per_page": visits.per_page,
+            "next_page": visits.next_num if visits.has_next else -1,
+            "prev_page": visits.prev_num if visits.has_prev else -1,
+            "data": [{"username": User.query.get(u.user_id).username, "start_date": u.start_date, "end_date": u.end_date} for u in visits.items],
+        })
+    except Exception as e:
+        resp = jsonify({"error": str(e)})
+        resp.status_code = 500
+        return resp
+
 def no_overlapping_dates(user_id, start_date, end_date):
     """
     method to check for overlapping dates for visit 
@@ -92,3 +113,4 @@ def add_to_database(object):
     """
     db.session.add(object)
     db.session.commit()
+

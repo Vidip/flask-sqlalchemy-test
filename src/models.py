@@ -24,10 +24,13 @@ class Visit(db.Model, Base):
     instructions = db.Column(db.Text, index=False, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
 
+    def __repr__(self):
+        return "<Visit {}>".format(self.id)
+
     @validates('start_date')
     def validate_start_date(self, key, start_date):
+        """validator for start date - serializer"""
         formated_date = datetime.datetime.fromisoformat(str(start_date))
-        print(formated_date)
         if formated_date >= datetime.datetime.utcnow():
             return formated_date
         else:
@@ -35,13 +38,9 @@ class Visit(db.Model, Base):
 
     @validates('end_date')
     def validate_end_date(self, key, end_date):
-        print("validating end date")
+         """validator for end date - serializer"""
         formated_date = datetime.datetime.fromisoformat(str(end_date))
-        print(formated_date)
         if formated_date >= datetime.datetime.utcnow():
             return formated_date
         else:
             raise ValueError("Date is less than today's date and time")
-
-    def __repr__(self):
-        return "<Visit {}>".format(self.instructions)
